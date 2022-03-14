@@ -51,3 +51,27 @@ def delete(id):
     db.session.delete(task)
     db.session.commit()
     return jsonify(response={"Success": "Task has been deleted!"})
+  
+@app.route("/api/add_task", methods=["POST"])
+def api_add_task():
+  # Get json request
+  req = request.get_json()
+  # Get string from json
+  title = req.get("title")
+  # Basic validation if string is empty
+  if not title:
+    return jsonify(message="Bad request"), 400
+  # Basic validation if it is already exist
+  task = Task.query.filter_by(title=title).first()
+  if task:
+    return jsonify(message="Task is already exist, try to add another task"), 409
+  # Try to save database
+  try:
+    new_task = Task(title=title)
+    db.session.add(new_task)
+    db.session.commit()
+    # Return jsonify
+    return jsonify(message="Success"), 201
+  # Throw exception
+  except Exception as err:
+    return jsonify(message=f"Something went wrong {err}"), 500
