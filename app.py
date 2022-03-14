@@ -65,13 +65,22 @@ def api_add_task():
   task = Task.query.filter_by(title=title).first()
   if task:
     return jsonify(message="Task is already exist, try to add another task"), 409
-  # Try to save database
-  try:
-    new_task = Task(title=title)
-    db.session.add(new_task)
-    db.session.commit()
-    # Return jsonify
-    return jsonify(message="Success"), 201
-  # Throw exception
-  except Exception as err:
-    return jsonify(message=f"Something went wrong {err}"), 500
+  # Save database
+  new_task = Task(title=title)
+  db.session.add(new_task)
+  db.session.commit()
+  # Return jsonify
+  return jsonify(message="Success"), 201
+
+@app.route("/api/update_task/<int:id>", methods=["PUT"])
+def api_update_task(id):
+  task = Task.query.filter_by(id=id).first()
+  # Validation
+  if not task:
+    return jsonify(message="Sorry, task does not exist!"), 404
+  # Get json
+  req = request.get_json()
+  # Save to database
+  task.title = req.get("title")
+  db.session.commit()
+  return jsonify(message="Task has been updated!"), 200
