@@ -84,3 +84,13 @@ def api_update_task(id):
   task.title = req.get("title")
   db.session.commit()
   return jsonify(message="Task has been updated!"), 200
+
+@app.route("/api/delete_task/<int:id>", methods=["DELETE"])
+def api_delete_task(id):
+  task = Task.query.filter_by(id=id).first()
+  # Validation
+  if not task:
+    return jsonify(message="Task not found"), 400
+  db.session.delete(task)
+  db.session.commit()
+  return jsonify(message="Success, task has been deleted!"), 200
