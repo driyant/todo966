@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -15,11 +15,9 @@ class Task(db.Model):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
-@app.route('/')
-def get_all():
-    tasks = db.session.query(Task).all()
-    return jsonify(tasks=[task.to_dict() for task in tasks])
-
+@app.route("/", methods=["GET"])
+def index():
+  return render_template("index.html")
 
 @app.route("/add", methods=["POST"])
 def add():
@@ -51,6 +49,12 @@ def delete(id):
     db.session.delete(task)
     db.session.commit()
     return jsonify(response={"Success": "Task has been deleted!"})
+  
+
+@app.route('/api/all')
+def get_all():
+    tasks = db.session.query(Task).all()
+    return jsonify(tasks=[task.to_dict() for task in tasks])
   
 @app.route("/api/add_task", methods=["POST"])
 def api_add_task():
