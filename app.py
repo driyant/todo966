@@ -34,17 +34,17 @@ def add():
     flash("Task has been added successfully", "success")
     return redirect(url_for("index"))
 
-@app.route('/update/<int:id>', methods=['PUT'])
+@app.route('/update/<int:id>', methods=['POST'])
 def update(id):
     task = Task.query.filter_by(id=id).first()
-    if task:
-        task.title = request.args.get("title")
-        db.session.commit()
-        return jsonify(response={"Success": "Task has been updated!"})
-    else:
-        return jsonify(response={"Failed": "Task was not found!"})
-
-
+    if not task:
+      flash("Task not found", "danger")
+      return redirect(url_for("index"))
+    task.title = request.form["title"]
+    db.session.commit()
+    flash(f"Task {task.title} has been updated!", "success")
+    return redirect(url_for("index"))
+    
 @app.route('/delete/<int:id>', methods=['POST'])
 def delete(id):
     task = Task.query.filter_by(id=id).first()
