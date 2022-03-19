@@ -25,7 +25,7 @@
                   {% if messages %} 
                       {% for category, message in messages %}
                       <div class="alert alert-primary alert-dismissible fade show" role="alert">
-                        A simple primary alert—check it out!
+                        {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
                       {% endfor %}
@@ -33,10 +33,12 @@
                 {% endwith %}
                 <form
                   class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-4 pb-2"
+                  method="POST"
+                  action="/add"
                 >
                   <div class="col-12 pt-4">
                     <div class="form-outline">
-                      <input type="text" id="form-task" name="form-task" class="form-control" />
+                      <input type="text" id="title" name="title" class="form-control" />
                       <label class="form-label" for="form1"
                         >Enter a task here</label
                       >
@@ -54,19 +56,21 @@
                     <tr>
                       <th scope="col">No.</th>
                       <th scope="col">Todo item</th>
-                      <th scope="col">Status</th>
                       <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {% for task in tasks %}
                     <tr>
-                      <th scope="row">1</th>
-                      <td>Buy groceries for next week</td>
-                      <td>In progress</td>
+                      <th scope="row">{{ loop.index }}</th>
+                      <td>{{ task.title }}</td>
                       <td>
-                        <button type="submit" class="btn btn-danger">
-                          Delete
-                        </button>
+                        <form action="/delete/{{ task.id }}" method="POST">
+                          <button
+                            type="submit" class="btn btn-danger">
+                            Delete
+                          </button>
+                        </form>
                         <button
                           type="submit"
                           class="btn btn-success ms-1"
@@ -75,8 +79,9 @@
                         >
                           Edit
                         </button>
-                      </td>
+                      </td>                  
                     </tr>
+                    {% endfor %}
                   </tbody>
                 </table>
               </div>

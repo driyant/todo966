@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "BAnas213as3"
 db = SQLAlchemy(app)
 
 
@@ -17,20 +18,21 @@ class Task(db.Model):
 
 @app.route("/", methods=["GET"])
 def index():
-  return render_template("index.html")
+  tasks = Task.query.all()
+  return render_template("index.html", tasks=tasks)
 
 @app.route("/add", methods=["POST"])
 def add():
     title = request.form.get("title")
-    new_task = Task(title=title)
     task = Task.query.filter_by(title=title).first()
-    if not task:
-        db.session.add(new_task)
-        db.session.commit()
-        return jsonify(response={"Success": "Task has been added!"})
-    else:
-        return jsonify(response={"Failed": "Data is already exist!"})
-
+    if task:
+      flash("Task already exist!", "danger")
+      return redirect(url_for("index")) 
+    new_task = Task(title=title)
+    db.session.add(new_task)
+    db.session.commit()
+    flash("Task has been added successfully", "success")
+    return redirect(url_for("index"))
 
 @app.route('/update/<int:id>', methods=['PUT'])
 def update(id):
@@ -43,12 +45,13 @@ def update(id):
         return jsonify(response={"Failed": "Task was not found!"})
 
 
-@app.route('/delete/<int:id>', methods=['DELETE'])
+@app.route('/delete/<int:id>', methods=['POST'])
 def delete(id):
     task = Task.query.filter_by(id=id).first()
     db.session.delete(task)
     db.session.commit()
-    return jsonify(response={"Success": "Task has been deleted!"})
+    flash(f"Task {task.title} has been deleted!", "success")
+    return redirect(url_for("index"))
   
 
 @app.route('/api/all')
